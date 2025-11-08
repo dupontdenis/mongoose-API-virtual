@@ -86,18 +86,16 @@ Hit the JSON endpoint: `http://localhost:3000/api/posts`
 
 ## 🌐 CORS
 
-The server is configured to allow requests from typical local dev static hosts:
+By default, CORS is now permissive (allows all origins) to make local testing easy from any static host or tool.
 
-- `http://127.0.0.1:5500`
-- `http://localhost:5500`
-
-Override allowed origins by setting the environment variable:
+If you want to restrict CORS in certain environments, set:
 
 ```
-CORS_ORIGINS=http://localhost:5173,http://localhost:4200
+RESTRICT_CORS=true
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:4200
 ```
 
-If your frontend runs elsewhere, add its origin there.
+With `RESTRICT_CORS=true`, only origins listed in `ALLOWED_ORIGINS` will be allowed.
 
 ---
 
@@ -110,8 +108,8 @@ Create any static `index.html` and use:
 <script>
   async function load() {
     const res = await fetch("http://localhost:3000/api/posts");
-    const data = await res.json();
-    document.getElementById("posts").innerHTML = data.posts
+    const posts = await res.json();
+    document.getElementById("posts").innerHTML = posts
       .map((p) => `<li><strong>${p.title}</strong><p>${p.summary}</p></li>`)
       .join("");
   }

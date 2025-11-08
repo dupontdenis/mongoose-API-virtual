@@ -12,25 +12,29 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-// CORS: allow Live Server defaults (127.0.0.1:5500, localhost:5500) or override via CORS_ORIGINS env (comma-separated)
-const defaultAllowed = ["http://127.0.0.1:5500", "http://localhost:5500"];
-const allowedOrigins = (process.env.CORS_ORIGINS || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-const origins = allowedOrigins.length ? allowedOrigins : defaultAllowed;
-
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || origins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    methods: ["GET", "HEAD", "OPTIONS"],
-  })
-);
-// Handle preflight
-app.options("*", cors());
+// CORS: now permissive (allows all origins). To restrict again, set RESTRICT_CORS=true
+// and provide a comma-separated ALLOWED_ORIGINS env variable.
+if (process.env.RESTRICT_CORS === "true") {
+  const allowed = (process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  app.use(
+    cors({
+      origin(origin, cb) {
+        if (!origin || allowed.length === 0 || allowed.includes(origin))
+          return cb(null, true);
+        return cb(new Error("CORS blocked: " + origin));
+      },
+      methods: ["GET", "HEAD", "OPTIONS"],
+    })
+  );
+  app.options("*", cors());
+} else {
+  // Fully open CORS (all origins, default safe methods)
+  app.use(cors({ origin: true }));
+  app.options("*", cors());
+}
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
