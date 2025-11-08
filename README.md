@@ -46,8 +46,8 @@ Hit the JSON endpoint: `http://localhost:3000/api/posts`
 
 | Method | Endpoint         | Description                                                 |
 | ------ | ---------------- | ----------------------------------------------------------- |
-| GET    | `/api/posts`     | List all posts → `{ posts: [...], count }`                  |
-| GET    | `/api/posts/:id` | Single post → `{ post: { id, title, body, url, summary } }` |
+| GET    | `/api/posts`     | List all posts → `{ data: [...], count }`                   |
+| GET    | `/api/posts/:id` | Single post → `{ data: { id, title, body, url, summary } }` |
 
 ### Example Responses
 
@@ -55,7 +55,7 @@ Hit the JSON endpoint: `http://localhost:3000/api/posts`
 
 ```json
 {
-  "posts": [
+  "data": [
     {
       "id": "65f...",
       "title": "First Post",
@@ -72,7 +72,7 @@ Hit the JSON endpoint: `http://localhost:3000/api/posts`
 
 ```json
 {
-  "post": {
+  "data": {
     "id": "65f...",
     "title": "First Post",
     "body": "Full body text...",
@@ -108,8 +108,8 @@ Create any static `index.html` and use:
 <script>
   async function load() {
     const res = await fetch("http://localhost:3000/api/posts");
-    const posts = await res.json();
-    document.getElementById("posts").innerHTML = posts
+    const json = await res.json();
+    document.getElementById("posts").innerHTML = json.data
       .map((p) => `<li><strong>${p.title}</strong><p>${p.summary}</p></li>`)
       .join("");
   }

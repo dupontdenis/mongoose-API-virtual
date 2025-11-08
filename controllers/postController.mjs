@@ -55,7 +55,7 @@ export const getAllPostsJson = async (req, res) => {
       url: post.url, // virtual
       summary: post.getSummary(100),
     }));
-    res.json({ posts: data, count: data.length });
+    res.json({ data, count: data.length });
   } catch (error) {
     res
       .status(500)
@@ -69,7 +69,7 @@ export const getPostByIdJson = async (req, res) => {
     const post = await BlogPost.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
     res.json({
-      post: {
+      data: {
         id: post._id,
         title: post.title,
         body: post.body,

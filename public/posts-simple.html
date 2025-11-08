@@ -33,7 +33,7 @@
           return;
         }
         statusEl.textContent = `Loaded ${data.count} posts.`;
-        data.posts.forEach(p => {
+        data.data.forEach(p => {
           const li = document.createElement('li');
           // Prefer server-rendered route only when actually running on the Express app (port 3000)
           const onServer3000 = (location.protocol.startsWith('http') && location.port === '3000');

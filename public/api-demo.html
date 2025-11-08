@@ -43,7 +43,7 @@
         const json = await res.json();
         statusDiv.textContent = `Loaded ${json.count} posts from ${API_URL}`;
         rawPre.textContent = JSON.stringify(json, null, 2);
-        json.posts.forEach(p => {
+        json.data.forEach(p => {
           const li = document.createElement('li');
           li.innerHTML = `<h3>${p.title}</h3><p class='muted'>${p.summary}</p><small>id: ${p.id}</small>`;
           postsUl.appendChild(li);

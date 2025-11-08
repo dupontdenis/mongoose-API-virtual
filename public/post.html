@@ -45,7 +45,7 @@
             throw new Error(msg);
           }
           const data = await res.json();
-          const p = data.post;
+          const p = data.data;
           titleEl.textContent = p.title;
           contentEl.innerHTML = `<p>${p.body}</p>`;
         } catch (err) {
