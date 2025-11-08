@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Demo: Fetch Blog Posts</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body {
+      max-width: 760px;
+      margin: 2rem auto;
+      font-family: system-ui, Arial;
+    }
+
+    .error {
+      background: #ffe2e2;
+      padding: 1rem;
+      border: 1px solid #ff9090;
+    }
+
+    pre {
+      background: #111;
+      color: #eee;
+      padding: 1rem;
+      overflow: auto;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Courier New', monospace;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🔌 Blog Posts API Demo</h1>
+  <p>This page fetches JSON from <code>/api/posts</code> and renders it client-side. You can copy this approach into
+    another project or a static <code>index.html</code>.</p>
+
+  <button id="reload">Reload Posts</button>
+  <div id="status" class="muted"></div>
+  <ul id="posts"></ul>
+
+  <h2>Raw Response</h2>
+  <pre id="raw"></pre>
+
+  <script>
+    // Determine API base dynamically. If this page is served by the Express app on port 3000
+    // we can use relative paths. If it's served from another dev server (e.g. Live Server 5500)
+    // we point back to port 3000 on the same hostname.
+    const SAME_PORT_API = location.port === '3000';
+    const API_BASE = SAME_PORT_API ? '' : `${location.protocol}//${location.hostname}:3000`;
+    const API_URL = `${API_BASE}/api/posts`;
+
+    const postsUl = document.getElementById('posts');
+    const rawPre = document.getElementById('raw');
+    const statusDiv = document.getElementById('status');
+    const reloadBtn = document.getElementById('reload');
+
+    async function load() {
+      postsUl.innerHTML = '';
+      rawPre.textContent = '';
+      statusDiv.textContent = `Loading from ${API_URL} ...`;
+      try {
+        const res = await fetch(API_URL, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' (while requesting ' + API_URL + ')');
+        const json = await res.json();
+        statusDiv.textContent = `Loaded ${json.count} posts from ${API_URL}`;
+        rawPre.textContent = JSON.stringify(json, null, 2);
+        json.posts.forEach(p => {
+          const li = document.createElement('li');
+          li.innerHTML = `<h3>${p.title}</h3><p class='muted'>${p.summary}</p><small>id: ${p.id}</small>`;
+          postsUl.appendChild(li);
+        });
+      } catch (err) {
+        statusDiv.innerHTML = `<div class='error'>Failed to load from <code>${API_URL}</code><br>${err.message}<br><small>Is the server running with <code>npm run server</code>?</small></div>`;
+      }
+    }
+
+    reloadBtn.addEventListener('click', load);
+    load();
+  </script>
+</body>
+
+</html>

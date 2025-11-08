@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Posts (Simple)</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <h1>📚 Blog Posts</h1>
+  <p class="muted">Ultra-minimal client-side page. Data comes from <code>/api/posts</code>.</p>
+  <button id="reload">Reload</button>
+  <div id="status" class="loading">Loading...</div>
+  <ul id="list"></ul>
+  <footer>Simple list demo – uses fetch + JSON API.</footer>
+
+  <script>
+    const SAME_PORT = location.port === '3000';
+    const API_BASE = SAME_PORT ? '' : `${location.protocol}//${location.hostname}:3000`;
+    const URL = `${API_BASE}/api/posts`;
+    const listEl = document.getElementById('list');
+    const statusEl = document.getElementById('status');
+    const reloadBtn = document.getElementById('reload');
+
+    async function load() {
+      statusEl.textContent = `Loading from ${URL} ...`;
+      listEl.innerHTML = '';
+      try {
+        const res = await fetch(URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.count === 0) {
+          statusEl.textContent = 'No posts.';
+          return;
+        }
+        statusEl.textContent = `Loaded ${data.count} posts.`;
+        data.posts.forEach(p => {
+          const li = document.createElement('li');
+          // If we are not on port 3000 (Live Server), link to the static post viewer
+          const onLiveServer = location.port && location.port !== '3000';
+          const href = onLiveServer ? `post.html?id=${encodeURIComponent(p.id)}` : p.url;
+          li.innerHTML = `<a href='${href}' rel='noopener'>${p.title}</a>` +
+            (p.summary ? `<div class='muted'>${p.summary}</div>` : '');
+          listEl.appendChild(li);
+        });
+      } catch (err) {
+        statusEl.innerHTML = `<div class='error'>Failed to load from <code>${URL}</code><br>${err.message}<br><small>Is the server running (npm run server)?</small></div>`;
+      }
+    }
+
+    reloadBtn.addEventListener('click', load);
+    load();
+  </script>
+</body>
+
+</html>

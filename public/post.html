@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Post</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* Minimal page-specific helpers, layout comes from css/style.css */
+    .container {
+      max-width: 760px;
+      margin: 2rem auto;
+    }
+
+    .error {
+      background: #ffe9e9;
+      border: 1px solid #ff9d9d;
+      padding: .75rem;
+      border-radius: 6px;
+    }
+
+    .muted {
+      color: #555;
+    }
+
+    .skeleton {
+      background: #f3f3f3;
+      border-radius: 6px;
+      height: 1em;
+      margin: .4rem 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <p><a href="posts-simple.html">← Back to posts</a></p>
+    <h1 id="title">Loading…</h1>
+    <div id="content" class="post-content"></div>
+    <div id="info" class="muted"></div>
+  </div>
+
+  <script>
+    // Parse ?id=... from the query string
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+
+    const titleEl = document.getElementById('title');
+    const contentEl = document.getElementById('content');
+    const infoEl = document.getElementById('info');
+
+    if (!id) {
+      titleEl.textContent = 'Missing id parameter';
+      contentEl.innerHTML = '<div class="error">Use post.html?id=POST_ID</div>';
+    } else {
+      const SAME_PORT = location.port === '3000';
+      const API_BASE = SAME_PORT ? '' : `${location.protocol}//${location.hostname}:3000`;
+      const URL = `${API_BASE}/api/posts/${encodeURIComponent(id)}`;
+
+      async function load() {
+        titleEl.textContent = 'Loading…';
+        contentEl.textContent = '';
+        infoEl.textContent = '';
+        try {
+          const res = await fetch(URL, { headers: { 'Accept': 'application/json' } });
+          if (!res.ok) {
+            let msg = `HTTP ${res.status}`;
+            try { const j = await res.json(); if (j && j.error) msg += ` - ${j.error}`; } catch { }
+            throw new Error(msg);
+          }
+          const data = await res.json();
+          const p = data.post;
+          titleEl.textContent = p.title;
+          contentEl.innerHTML = `<p>${p.body}</p>`;
+          infoEl.innerHTML = `Source: <code>${URL}</code>`;
+        } catch (err) {
+          titleEl.textContent = 'Error';
+          contentEl.innerHTML = `<div class='error'>Failed to load post.<br>${err.message}<br><small>Is the API running on port 3000?</small></div>`;
+        }
+      }
+
+      load();
+    }
+  </script>
+</body>
+
+</html>
